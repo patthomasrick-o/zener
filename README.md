@@ -4,9 +4,9 @@ A Discord Bot.
 
 ## Install
 
-Python 3.10 was used. You can probably go lower, but support is at your own risk.
+[Python](https://www.python.org/downloads/) 3.10 was used. You can probably go lower, but support is at your own risk.
 
-I strongly recommend setting up a Venv, but this can be skipped:
+I strongly recommend setting up a `venv`, but this can be skipped:
 
 ```sh
 python -m venv .venv
@@ -29,6 +29,28 @@ Launch:
 
 ```sh
 python -m zener
+```
+
+### Via Docker
+
+You can also start the application via [Docker](https://www.docker.com/) or [Docker Compose](https://docs.docker.com/compose/).
+
+Docker Compose is also provided purely for convenience and for hosting.
+
+#### Docker
+
+<!-- prettier-ignore -->
+_From [https://hub.docker.com/\_/python/](https://hub.docker.com/_/python/)._
+
+```sh
+docker build -t my-python-app .
+docker run -it --rm --name my-running-app my-python-app
+```
+
+#### Docker Compose
+
+```sh
+docker-compose up
 ```
 
 ## Commands
