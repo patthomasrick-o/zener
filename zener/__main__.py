@@ -2,11 +2,9 @@ import logging
 
 import discord
 from discord.ext import commands
-from zener.commands.join import JoinCommand
-from zener.commands.leave import LeaveCommand
-from zener.commands.stop import StopCommand
-from zener.commands.youtube import YouTubeCommand
 
+from zener.commands.youtube.register import register as register_youtube
+from zener.commands.util.register import register as register_util
 from zener.config import Config
 
 logging.basicConfig(level=logging.INFO)
@@ -59,10 +57,8 @@ if __name__ == "__main__":
         logging.info(f"Logged in as {client.user}")
 
         logging.info("Registering commands.")
-        await client.add_cog(JoinCommand(client))
-        await client.add_cog(LeaveCommand(client))
-        await client.add_cog(StopCommand(client))
-        await client.add_cog(YouTubeCommand(client))
+        await register_youtube(client)
+        await register_util(client)
 
         # Sync commands on guilds.
         logging.info("Syncing commands on guilds.")
