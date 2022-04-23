@@ -1,6 +1,5 @@
+import asyncio
 import logging
-import os
-from hashlib import md5
 
 import discord
 import yt_dlp as youtube_dl
@@ -11,14 +10,43 @@ logging.basicConfig(level=logging.INFO)
 
 YDL_OPTS = {
     "format": "bestaudio/best",
-    "postprocessors": [
-        {
-            "key": "FFmpegExtractAudio",
-            "preferredcodec": "mp3",
-            "preferredquality": "192",
-        }
-    ],
+    "restrictfilenames": True,
+    "noplaylist": True,
+    "nocheckcertificate": True,
+    "ignoreerrors": False,
+    "logtostderr": False,
+    "quiet": True,
+    "no_warnings": True,
 }
+
+FFMPEG_OPTS = {
+    "options": "-vn",
+}
+
+yt_dl = youtube_dl.YoutubeDL(YDL_OPTS)
+
+
+class YTDLSource(discord.PCMVolumeTransformer):
+    # From https://github.com/Rapptz/discord.py/blob/master/examples/basic_voice.py
+    def __init__(self, source, *, data, volume=1.0):
+        super().__init__(source, volume)
+        self.data = data
+        self.title = data.get("title")
+        self.url = data.get("url")
+
+    @classmethod
+    async def from_url(cls, url, *, loop=None, stream=False):
+        loop = loop or asyncio.get_event_loop()
+        data = await loop.run_in_executor(
+            None, lambda: yt_dl.extract_info(url, download=not stream)
+        )
+
+        if "entries" in data:
+            # Take first item from a playlist.
+            data = data["entries"][0]
+
+        filename = data["url"] if stream else yt_dl.prepare_filename(data)
+        return cls(discord.FFmpegPCMAudio(filename, **FFMPEG_OPTS), data=data)
 
 
 def register(bot: commands.Bot):
@@ -30,50 +58,31 @@ def register(bot: commands.Bot):
         # Make sure we are in a voice channel.
         if not ctx.voice_client:
             return
+
         voice_client: discord.VoiceClient = ctx.voice_client
         if not voice_client.is_connected():
-            logging.info("Voice client is not connected.")
-            return
+            # Try to join sender's voice channel.
+            voice_channel = ctx.author.voice
+            if voice_channel is None:
+                logging.info("Voice client is not connected.")
+                return
+            else:
+                channel = voice_channel.channel
+                await channel.connect()
+                await ctx.guild.change_voice_state(
+                    channel=channel, self_deaf=True
+                )
 
         # Delete the command message.
         if ctx.message:
             message: discord.Message = ctx.message
             await message.delete()
 
-        # URL hash is name.
-        name = md5(url.encode("utf-8")).hexdigest()
-        output_path = os.path.join("cache", f"{name}.mp3")
-        logging.info(f"Output path: {output_path}")
-        if not os.path.exists(output_path):
-            logging.info("Output path does not exist. Downloading.")
-            await ctx.send(f"Downloading/converting video...")
-            ydl_opts = YDL_OPTS.copy()
-            ydl_opts["outtmpl"] = os.path.join("cache", f"{name}.%(ext)s")
-
-            try:
-                with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-                    file = ydl.extract_info(url, download=True)
-                    if not file:
-                        logging.info(f"Failed to download {url}.")
-                        return
-            except youtube_dl.utils.ExtractorError:
-                logging.info(f"Failed to download {url}: ExtractorError.")
-                return
-
-        # If we are already playing, stop.
-        if voice_client.is_playing():
-            logging.info("Voice client is already playing. Stopping.")
-            voice_client.stop()
-
-        # Play the file.
-        logging.info(f"Playing file {output_path}.")
-        voice_client.play(
-            discord.FFmpegPCMAudio(output_path),
-            after=lambda e: logging.info(f"Finished playing {output_path}."),
-        )
-        # Set the volume.
-        voice_client.source = discord.PCMVolumeTransformer(
-            voice_client.source, 1
-        )
+        async with ctx.typing():
+            player = await YTDLSource.from_url(url, loop=bot.loop, stream=True)
+            ctx.voice_client.play(
+                player,
+                after=lambda e: print(f"Player error: {e}") if e else None,
+            )
 
         await ctx.send(f"Playing {url}")
