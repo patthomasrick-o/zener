@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 
 from zener.commands.youtube.register import register as register_youtube
+from zener.commands.util.register import register as register_util
 from zener.config import Config
 
 logging.basicConfig(level=logging.INFO)
@@ -57,6 +58,7 @@ if __name__ == "__main__":
 
         logging.info("Registering commands.")
         await register_youtube(client)
+        await register_util(client)
 
         # Sync commands on guilds.
         logging.info("Syncing commands on guilds.")
