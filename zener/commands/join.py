@@ -1,36 +1,41 @@
 import logging
 
 import discord
+from discord import app_commands
 from discord.ext import commands
 
 logging.basicConfig(level=logging.INFO)
 
 
-def register(bot: commands.Bot):
-    @bot.command()
-    async def join(ctx: commands.Context):
-        logging.info(f"Join command called by {ctx.author.name}.")
+class JoinCommand(commands.Cog):
+    # See https://gist.github.com/AbstractUmbra/a9c188797ae194e592efe05fa129c57f
+
+    def __init__(self, bot: commands.Bot) -> None:
+        self.bot = bot
+
+    @app_commands.command(name="join", description="Joins a voice channel.")
+    async def join(self, interaction: discord.Interaction) -> None:
+        """Join a voice channel."""
+
         # Get the sender's voice channel.
-        voice_channel = ctx.author.voice
-        if voice_channel is None:
-            # Reply and @mention the user.
-            logging.info(f"{ctx.author.name} is not in a voice channel.")
-            await ctx.send(
-                f"{ctx.author.mention} You are not in a voice channel."
+        voice = interaction.user.voice
+        if not voice:
+            await interaction.response.send_message(
+                "Cannot join voice channel.", ephemeral=True
             )
             return
-        else:
-            logging.info(f"{ctx.author.name} is in a voice channel. Joining.")
-            channel = voice_channel.channel
-            await channel.connect()
-
-            # Deafen self.
-            logging.info(f"Deafening self.")
-            await ctx.guild.change_voice_state(channel=channel, self_deaf=True)
-
-            # Delete the command message.
-            if ctx.message:
-                message: discord.Message = ctx.message
-                await message.delete()
-
+        channel = voice.channel
+        if not channel:
+            await interaction.response.send_message(
+                "Cannot join voice channel: you are not in a channel.",
+                ephemeral=True,
+            )
             return
+
+        # Join the channel.
+        logging.info(f"Joining voice channel: {channel}")
+        await interaction.response.send_message(
+            f"Joining voice channel {channel.name}.",
+            ephemeral=True,
+        )
+        await channel.connect(self_deaf=True)

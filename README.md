@@ -2,6 +2,8 @@
 
 A Discord Bot.
 
+[Add Zener to your server (may require explicit permission from me)](https://discord.com/api/oauth2/authorize?client_id=967217448384331776&permissions=2159029248&scope=bot%20applications.commands)
+
 ## Install
 
 [Python](https://www.python.org/downloads/) 3.10 was used. You can probably go lower, but support is at your own risk.
