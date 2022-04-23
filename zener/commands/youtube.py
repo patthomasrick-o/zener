@@ -3,7 +3,9 @@ import logging
 
 import discord
 import yt_dlp as youtube_dl
+from discord import app_commands
 from discord.ext import commands
+from zener.config import Config
 
 logging.basicConfig(level=logging.INFO)
 
@@ -22,6 +24,7 @@ YDL_OPTS = {
 FFMPEG_OPTS = {
     "options": "-vn",
 }
+
 
 yt_dl = youtube_dl.YoutubeDL(YDL_OPTS)
 
@@ -49,40 +52,68 @@ class YTDLSource(discord.PCMVolumeTransformer):
         return cls(discord.FFmpegPCMAudio(filename, **FFMPEG_OPTS), data=data)
 
 
-def register(bot: commands.Bot):
-    @bot.command(pass_context=True)
-    async def play(ctx, url):
-        logging.info(f"Play command called by {ctx.author.name}.")
-        logging.info(f"URL: {url}")
+class YouTubeCommand(commands.Cog):
+    def __init__(self, bot: commands.Bot) -> None:
+        self.bot = bot
 
-        # Make sure we are in a voice channel.
-        if not ctx.voice_client:
+    @app_commands.command(name="youtube", description="Play a YouTube URL.")
+    async def youtube(self, interaction: discord.Interaction, url: str) -> None:
+        await self._youtube(interaction, url)
+
+    @app_commands.command(name="play", description="Play a YouTube URL.")
+    async def play(self, interaction: discord.Interaction, url: str) -> None:
+        await self._youtube(interaction, url)
+
+    @app_commands.command(name="yt", description="Play a YouTube URL.")
+    async def yt(self, interaction: discord.Interaction, url: str) -> None:
+        await self._youtube(interaction, url)
+
+    async def _youtube(
+        self, interaction: discord.Interaction, url: str
+    ) -> None:
+        """Leave a voice channel."""
+        if not interaction.guild:
+            await interaction.response.send_message(
+                "Cannot play: I am not in a guild.",
+                ephemeral=True,
+            )
             return
 
-        voice_client: discord.VoiceClient = ctx.voice_client
-        if not voice_client.is_connected():
-            # Try to join sender's voice channel.
-            voice_channel = ctx.author.voice
-            if voice_channel is None:
-                logging.info("Voice client is not connected.")
-                return
-            else:
-                channel = voice_channel.channel
-                await channel.connect()
-                await ctx.guild.change_voice_state(
-                    channel=channel, self_deaf=True
+        # If not in a voice channel, try to join.
+        if not interaction.guild.voice_client:
+            # Get the sender's voice channel.
+            voice = interaction.user.voice
+            if not voice:
+                await interaction.response.send_message(
+                    "Cannot play: Cannot join voice channel.", ephemeral=True
                 )
+                return
+            channel = voice.channel
+            if not channel:
+                await interaction.response.send_message(
+                    "Cannot play: Cannot join voice channel: you are not in a channel.",
+                    ephemeral=True,
+                )
+                return
+            await channel.connect(self_deaf=True)
 
-        # Delete the command message.
-        if ctx.message:
-            message: discord.Message = ctx.message
-            await message.delete()
-
-        async with ctx.typing():
-            player = await YTDLSource.from_url(url, loop=bot.loop, stream=True)
-            ctx.voice_client.play(
-                player,
-                after=lambda e: print(f"Player error: {e}") if e else None,
+        # If still not in a voice channel, do nothing.
+        if not interaction.guild.voice_client:
+            await interaction.response.send_message(
+                "Cannot play: no voice client.",
+                ephemeral=True,
             )
+            return
 
-        await ctx.send(f"Playing {url}")
+        # Play the audio.
+        vc = interaction.guild.voice_client
+        player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
+        vc.play(
+            player,
+            after=lambda e: print(f"Player error: {e}") if e else None,
+        )
+
+        await interaction.response.send_message(
+            f"Playing {url}.",
+            ephemeral=True,
+        )
