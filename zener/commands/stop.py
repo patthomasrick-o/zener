@@ -8,8 +8,8 @@ logging.basicConfig(level=logging.INFO)
 
 def register(bot: commands.Bot):
     @bot.command()
-    async def leave(ctx: commands.Context):
-        logging.info(f"Leave command called by {ctx.author.name}.")
+    async def stop(ctx: commands.Context):
+        logging.info(f"Stop command called by {ctx.author.name}.")
 
         # Leave the current voice channel.
         if not ctx.voice_client:
@@ -21,10 +21,6 @@ def register(bot: commands.Bot):
 
         # Make sure we stop playing things.
         voice_client.stop()
-
-        # Leave.
-        logging.info(f"Leaving voice channel.")
-        await voice_client.disconnect()
 
         # Delete the command message.
         if ctx.message:
