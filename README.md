@@ -2,6 +2,35 @@
 
 A Discord Bot.
 
+## Install
+
+Python 3.10 was used. You can probably go lower, but support is at your own risk.
+
+I strongly recommend setting up a Venv, but this can be skipped:
+
+```sh
+python -m venv .venv
+
+# Linux
+source .venv/bin/activate
+# # Windows (Powershell)
+# ps .venv/Scripts/Activate.ps1
+```
+
+Install requirements:
+
+```sh
+pip install -r requirements.txt
+```
+
+Save your bot token to `secret.txt`. Contents should just be the token itself on the first line. Newline doesn't matter.
+
+Launch:
+
+```sh
+python -m zener
+```
+
 ## Commands
 
 ### `!join`
