@@ -57,23 +57,44 @@ docker-compose up
 
 ## Commands
 
-### `!join`
+All commands are accessible through Discord's bot application command integrations. Typing `/` should bring up this bot's commands.
 
-Join the voice chat of the sender user.
+The commands are refreshed on bot restart for every guild that the application has access to.
 
-### `!leave`
+### YouTube
 
-Leave all voice chats.
+#### `/join`
 
-### `!play <video link or video ID>`
+Join the sender's current voice channel.
 
-Play a YouTube video in the voice chat.
+#### `/leave`
 
-_Aliases: `!yt`, `!youtube`_
+Leave the bot's voice channel on the current guild. Does not require that the sender is in the same voice channel.
 
-### `!stop`
+#### `/play <YouTube URL>`
 
-Stop the current playback.
+_Aliases:_
+
+- `/youtube <YouTube URL>`
+- `/yt <YouTube URL>`
+
+Play the specified link in the bot's current voice channel.
+
+If the bot is not in a voice channel and the sender is, then the bot will first join the sender's voice channel and then play the audio of the URL.
+
+### Utilities
+
+#### `/rm messages_by_exact_text <Message contents>`
+
+Find all messages that exactly match the first argument and prompt if those messages should be deleted.
+
+This operation must be confirmed for it to occur.
+
+#### `/rm messages_by_start_text <Message contents>`
+
+Find all messages that start with the first argument and prompt if those messages should be deleted.
+
+This operation must be confirmed for it to occur.
 
 ## Why is it named Zener?
 
