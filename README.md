@@ -82,6 +82,10 @@ Play the specified link in the bot's current voice channel.
 
 If the bot is not in a voice channel and the sender is, then the bot will first join the sender's voice channel and then play the audio of the URL.
 
+#### `/stop`
+
+Stop the currently playing song but stay in the voice channel. A song must be playing for this to be successful.
+
 ### Utilities
 
 #### `/rm messages_by_exact_text <Message contents>`
