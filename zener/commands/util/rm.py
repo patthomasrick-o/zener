@@ -64,6 +64,14 @@ class Rm(commands.Cog):
             )
             return
 
+        # Make sure the sender is an admin.
+        if not await self.ensure_admin(interaction):
+            await interaction.response.send_message(
+                "Cannot remove messages: insufficient permissions.",
+                ephemeral=True,
+            )
+            return
+
         # Get messages from the channel.
         to_delete = []
         message: Message
@@ -97,6 +105,14 @@ class Rm(commands.Cog):
             )
             return
 
+        # Make sure the sender is an admin.
+        if not await self.ensure_admin(interaction):
+            await interaction.response.send_message(
+                "Cannot remove messages: insufficient permissions.",
+                ephemeral=True,
+            )
+            return
+
         # Get messages from the channel.
         to_delete = []
         message: Message
@@ -105,6 +121,19 @@ class Rm(commands.Cog):
                 to_delete.append(message)
 
         await self.confirm_delete(interaction, to_delete)
+
+    async def ensure_admin(self, interaction: discord.Interaction) -> bool:
+        """Ensure the sender is an admin.
+
+        Args:
+            interaction (discord.Interaction): Interaction.
+        """
+        # Make sure the sender is an admin.
+        if interaction.user and interaction.user.guild_permissions:
+            perms: discord.Permissions = interaction.user.guild_permissions
+            if perms.manage_messages or perms.administrator:
+                return True
+        return False
 
     async def confirm_delete(
         self, interaction: discord.Interaction, to_delete: list
