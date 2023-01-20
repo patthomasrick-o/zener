@@ -1,4 +1,5 @@
 import asyncio
+from ctypes.util import find_library
 import logging
 
 import discord
@@ -44,6 +45,9 @@ class YTDLSource(discord.PCMVolumeTransformer):
             None, lambda: yt_dl.extract_info(url, download=not stream)
         )
 
+        if not isinstance(data, dict):
+            return None
+
         if "entries" in data:
             # Take first item from a playlist.
             data = data["entries"][0]
@@ -55,6 +59,14 @@ class YTDLSource(discord.PCMVolumeTransformer):
 class YouTubeCommand(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
+
+        opus = find_library("opus")
+        if opus is None:
+            raise RuntimeError("Opus library not found.")
+
+        discord.opus.load_opus(opus)
+        if not discord.opus.is_loaded():
+            raise RuntimeError("Opus failed to load")
 
     @app_commands.command(name="youtube", description="Play a YouTube URL.")
     async def youtube(self, interaction: discord.Interaction, url: str) -> None:
@@ -107,7 +119,9 @@ class YouTubeCommand(commands.Cog):
 
         # Play the audio.
         vc = interaction.guild.voice_client
-        player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
+        player = await YTDLSource.from_url(
+            url, loop=self.bot.loop, stream=False
+        )
         vc.play(
             player,
             after=lambda e: print(f"Player error: {e}") if e else None,
