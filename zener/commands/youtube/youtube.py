@@ -117,6 +117,11 @@ class YouTubeCommand(commands.Cog):
             )
             return
 
+        await interaction.response.send_message(
+            f"Playing {url}.",
+            ephemeral=True,
+        )
+
         # Play the audio.
         vc = interaction.guild.voice_client
         player = await YTDLSource.from_url(
@@ -125,9 +130,4 @@ class YouTubeCommand(commands.Cog):
         vc.play(
             player,
             after=lambda e: print(f"Player error: {e}") if e else None,
-        )
-
-        await interaction.response.send_message(
-            f"Playing {url}.",
-            ephemeral=True,
         )
