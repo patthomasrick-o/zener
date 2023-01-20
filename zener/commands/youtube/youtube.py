@@ -40,6 +40,16 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
     @classmethod
     async def from_url(cls, url, *, loop=None, stream=False):
+        """Create a YTDLSource from a URL.
+
+        Args:
+            url (str): _description_
+            loop (bool|None, optional): Loop the sound? Defaults to None.
+            stream (bool, optional): Stream the audio rather than download and play. Not recommended to turn on - YouTube will disconnect the connection after about a minute. Defaults to False.
+
+        Returns:
+            FFmpegPCMAudio: The audio source.
+        """
         loop = loop or asyncio.get_event_loop()
         data = await loop.run_in_executor(
             None, lambda: yt_dl.extract_info(url, download=not stream)
