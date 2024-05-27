@@ -3,7 +3,7 @@ import logging
 import discord
 from discord.ext import commands
 
-from zener.commands.dialo.register import register as register_dialo
+from zener.commands.chat.register import register as register_chat
 from zener.commands.util.register import register as register_util
 from zener.commands.youtube.register import register as register_youtube
 from zener.config import Config
@@ -58,7 +58,8 @@ if __name__ == "__main__":
         logging.info("Registering commands.")
         await register_youtube(client)
         await register_util(client)
-        await register_dialo(client)
+        # await register_dialo(client)
+        await register_chat(client)
 
         # Sync commands on guilds.
         logging.info("Syncing commands on guilds.")

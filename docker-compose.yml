@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   zener:
     build:
@@ -9,11 +7,16 @@ services:
     volumes:
       # Create this.
       - ./config.ini:/usr/src/app/config.ini
+    depends_on:
+      - ollama
 
-  # Uncomment and point towards your dialo repo.
-  dialo:
-    build:
-      context: /home/thomas/development/godel
-      dockerfile: docker/Dockerfile
+  ollama:
+    hostname: ollama
+    image: "ollama/ollama"
     volumes:
-      - /app/data
+      - ollama:/root/.ollama
+    # ports:
+    #   - 11434:11434
+
+volumes:
+  ollama:

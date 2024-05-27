@@ -6,6 +6,8 @@ class Config:
     secret: str
     application_id: str
     command_mode: str
+    ollama_endpoint: str
+    ollama_model: str
 
     def __init__(self, config_file="config.ini"):
         # Get the configparser object
@@ -16,6 +18,10 @@ class Config:
             "secret": "your_secret_token",
             "application_id": "your_your_application_id",
             "command_mode": "guild",  # guild or global
+        }
+        self.config_object["CHAT"] = {
+            "ollama_endpoint": "http://ollama:11434/api",
+            "ollama_model": "llama2-uncensored",
         }
 
         # Read current file if exists.
