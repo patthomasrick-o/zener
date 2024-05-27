@@ -10,9 +10,7 @@ from .chat import chat_listener
 
 
 async def register(bot: Bot):
-
-    # Asynchronously pull the model.
-    __pull_model()
+    await __pull_model()
 
     # Instruct ollama to pull the model.
     bot.add_listener(chat_listener, "on_message")
