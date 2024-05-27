@@ -1,5 +1,22 @@
-version: "3.3"
-
 services:
-  python:
-    build: .
+  zener:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    volumes:
+      # Create this.
+      - ./config.ini:/usr/src/app/config.ini
+    depends_on:
+      - ollama
+
+  ollama:
+    hostname: ollama
+    image: "ollama/ollama"
+    volumes:
+      - ollama:/root/.ollama
+    # ports:
+    #   - 11434:11434
+
+volumes:
+  ollama:
