@@ -3,7 +3,9 @@ import logging
 
 import requests
 from discord import Message
+
 from zener.config import Config
+from zener.util import word_wrap
 
 logging.basicConfig(level=logging.INFO)
 
@@ -66,7 +68,7 @@ async def chat_listener(message: Message) -> None:
             config.ollama_endpoint + "/chat", data=request_body, timeout=300
         )
         if request.status_code != 200:
-            logging.error(f"Error from ollama: {request.status_code}, e{request.txt}")
+            logging.error(f"Error from ollama: {request.status_code}, e{request.text}")
             await message.reply("ERROR: Something went wrong. Please try again.")
             return
 
@@ -77,11 +79,16 @@ async def chat_listener(message: Message) -> None:
             .get("message", {})
             .get("content", "ERROR: Problem getting response.")
         ).strip()
+
         if reply == "":
             reply = "ERROR: No response from ollama."
 
         if reply.startswith("ERROR:"):
             logging.error(f"Error from ollama: {request.text}")
 
-        logging.info(f"Sending reply: {reply}")
-        await message.reply(reply)
+
+        # Discord max message length is 2000 characters. Wrap into lines.
+        wrapped_response = word_wrap(reply)
+        for part in wrapped_response:
+            logging.info(f"Sending reply: {part}")
+            await message.reply(part)

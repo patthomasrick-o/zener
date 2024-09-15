@@ -6,7 +6,6 @@ import discord
 import yt_dlp as youtube_dl
 from discord import app_commands
 from discord.ext import commands
-from zener.config import Config
 
 logging.basicConfig(level=logging.INFO)
 

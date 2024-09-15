@@ -1,4 +1,3 @@
-import asyncio
 from json import dumps
 
 import requests
@@ -7,13 +6,6 @@ from discord.ext.commands import Bot
 from zener.config import Config
 
 from .chat import chat_listener
-
-
-async def register(bot: Bot):
-    await __pull_model()
-
-    # Instruct ollama to pull the model.
-    bot.add_listener(chat_listener, "on_message")
 
 
 async def __pull_model():
@@ -26,3 +18,11 @@ async def __pull_model():
     )
 
     return True
+
+
+async def register(bot: Bot):
+    # Asynchronously pull the model.
+    await __pull_model()
+
+    # Instruct ollama to pull the model.
+        bot.add_listener(chat_listener, "on_message")

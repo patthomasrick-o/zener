@@ -34,12 +34,12 @@ class LeaveCommand(commands.Cog):
         try:
             if vc.is_playing() or vc.is_paused():
                 vc.stop()
-        except Exception as e:
+        except Exception:
             # No method?
             pass
 
         await interaction.guild.voice_client.disconnect(force=False)
         await interaction.response.send_message(
-            f"Left voice channel.",
+            "Left voice channel.",
             ephemeral=True,
         )
