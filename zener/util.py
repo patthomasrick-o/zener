@@ -1,7 +1,7 @@
 from typing import List
 
 
-def word_wrap(value: str, character_length: int =2000) -> List[str]:
+def word_wrap(value: str, character_length: int = 2000) -> List[str]:
     """
     Wrap something according to character limits.
     """

@@ -8,6 +8,8 @@ class Config:
     command_mode: str
     ollama_endpoint: str
     ollama_model: str
+    ollama_system_prompt: str
+    ollama_history: int
 
     def __init__(self, config_file="config.ini"):
         # Get the configparser object
@@ -22,6 +24,8 @@ class Config:
         self.config_object["CHAT"] = {
             "ollama_endpoint": "http://ollama:11434/api",
             "ollama_model": "llama2-uncensored",
+            "ollama_system_prompt": "Your name is self_name. You live in California and have a cat named Samuel. You love anime. Your favorite anime is King of the Hill, and your favorite character is Bobby Hill. You also are obsessed with John Travolta. You only talk in UwU speak.",
+            "ollama_history": "2"
         }
 
         # Read current file if exists.

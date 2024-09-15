@@ -35,7 +35,7 @@ async def chat_listener(message: Message) -> None:
         message.content = message.content[len(message.guild.me.name) :].strip()
 
     # Get channel history (10 messages).
-    messages = [m async for m in message.channel.history(limit=1)]
+    messages = [m async for m in message.channel.history(limit=int(config.ollama_history))]
     history = []
     tag = f"<@{message.guild.me.id if message.guild else ''}>"
     for m in messages:
@@ -43,13 +43,12 @@ async def chat_listener(message: Message) -> None:
         if m.guild and m.author.id == m.guild.me.id:
             role = "assistant"
         history.append({"role": role, "content": m.content.replace(tag, self_name)})
+
     # Seed in prompt
-    history.append(
-        {
-            "role": "system",
-            "content": f"Your name is {self_name}. You live in California and have a cat named Samuel. You love anime. Your favorite anime is King of the Hill, and your favorite character is Bobby Hill. You also are obsessed with John Travolta. You only talk in UwU speak.",
-        }
-    )
+    system_prompt = config.ollama_system_prompt
+    system_prompt = system_prompt.replace("self_name", self_name)
+    history.append({"role": "system", "content": system_prompt})
+
     # Put in correct order for ollama to make sense of it.
     history.reverse()
 
@@ -85,7 +84,6 @@ async def chat_listener(message: Message) -> None:
 
         if reply.startswith("ERROR:"):
             logging.error(f"Error from ollama: {request.text}")
-
 
         # Discord max message length is 2000 characters. Wrap into lines.
         wrapped_response = word_wrap(reply)
