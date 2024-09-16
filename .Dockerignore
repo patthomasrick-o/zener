@@ -1,6 +1,8 @@
 .vscode
+.zed
 cache/*
 secret.txt
+config.ini
 !cache/.gitkeep
 
 # Byte-compiled / optimized / DLL files

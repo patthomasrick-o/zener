@@ -2,8 +2,8 @@ FROM python:3.10
 
 WORKDIR /usr/src/app
 
-RUN apt update \
-  && apt install -fy ffmpeg \
+RUN apt-get update \
+  && apt-get install -fy ffmpeg \
   && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt ./
