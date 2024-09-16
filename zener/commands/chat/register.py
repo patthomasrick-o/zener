@@ -25,4 +25,4 @@ async def register(bot: Bot):
     await __pull_model()
 
     # Instruct ollama to pull the model.
-        bot.add_listener(chat_listener, "on_message")
+    bot.add_listener(chat_listener, "on_message")
