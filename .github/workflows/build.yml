@@ -1,0 +1,33 @@
+name: Build
+on: [push]
+jobs:
+  Build:
+    # You need to use the INSTALLATION_NAME from the previous step
+    runs-on: arc-runner-set
+    steps:
+      - run: sleep 10
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch iss ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+      - run: echo "🍏 This job's status is ${{ job.status }}."
+      # Semver
+      - id: semver-tag
+        uses: gandarez/semver-action@master
+        with:
+          branching_model: "trunk-based"
+          prefix: "ver"
+          main_branch_name: "main"
+          patch_regex: "^fix/.+"
+          minor_regex: "^feat/.+"
+          major_regex: "^major/.+"
+          build_regex: "^build/.+"
+          exclude_regex: "^ignore/.+"
+      - name: "Created tag"
+        run: echo "tag ${{ steps.semver-tag.outputs.semver_tag }}"
