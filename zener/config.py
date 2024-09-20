@@ -25,7 +25,7 @@ class Config:
             "ollama_endpoint": "http://ollama:11434/api",
             "ollama_model": "llama2-uncensored",
             "ollama_system_prompt": "Your name is self_name. You live in California and have a cat named Samuel. You love anime. Your favorite anime is King of the Hill, and your favorite character is Bobby Hill. You also are obsessed with John Travolta. You only talk in UwU speak.",
-            "ollama_history": "2"
+            "ollama_history": "2",
         }
 
         # Read current file if exists.
@@ -33,8 +33,11 @@ class Config:
             self.config_object.read(config_file)
 
         # Write back to config file to save default config to file.
-        with open(config_file, "w") as conf:
-            self.config_object.write(conf)
+        try:
+            with open(config_file, "w") as conf:
+                self.config_object.write(conf)
+        except OSError as e:
+            print("Could not write config file: {0}".format(e))
 
         # Set this object's attributes to the config values.
         for section in self.config_object.sections():
