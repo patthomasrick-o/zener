@@ -4,6 +4,7 @@ cache/*
 secret.txt
 config.ini
 !cache/.gitkeep
+deploy/kubernetes
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
