@@ -3,7 +3,9 @@ import logging
 
 import requests
 from discord import Message
+
 from zener.config import Config
+from zener.util import word_wrap
 
 logging.basicConfig(level=logging.INFO)
 
@@ -33,7 +35,7 @@ async def chat_listener(message: Message) -> None:
         message.content = message.content[len(message.guild.me.name) :].strip()
 
     # Get channel history (10 messages).
-    messages = [m async for m in message.channel.history(limit=1)]
+    messages = [m async for m in message.channel.history(limit=int(config.ollama_history))]
     history = []
     tag = f"<@{message.guild.me.id if message.guild else ''}>"
     for m in messages:
@@ -41,13 +43,12 @@ async def chat_listener(message: Message) -> None:
         if m.guild and m.author.id == m.guild.me.id:
             role = "assistant"
         history.append({"role": role, "content": m.content.replace(tag, self_name)})
+
     # Seed in prompt
-    history.append(
-        {
-            "role": "system",
-            "content": f"Your name is {self_name}. You live in California and have a cat named Samuel. You love anime. Your favorite anime is King of the Hill, and your favorite character is Bobby Hill. You also are obsessed with John Travolta. You only talk in UwU speak.",
-        }
-    )
+    system_prompt = config.ollama_system_prompt
+    system_prompt = system_prompt.replace("self_name", self_name)
+    history.append({"role": "system", "content": system_prompt})
+
     # Put in correct order for ollama to make sense of it.
     history.reverse()
 
@@ -66,7 +67,7 @@ async def chat_listener(message: Message) -> None:
             config.ollama_endpoint + "/chat", data=request_body, timeout=300
         )
         if request.status_code != 200:
-            logging.error(f"Error from ollama: {request.status_code}, e{request.txt}")
+            logging.error(f"Error from ollama: {request.status_code}, e{request.text}")
             await message.reply("ERROR: Something went wrong. Please try again.")
             return
 
@@ -77,11 +78,15 @@ async def chat_listener(message: Message) -> None:
             .get("message", {})
             .get("content", "ERROR: Problem getting response.")
         ).strip()
+
         if reply == "":
             reply = "ERROR: No response from ollama."
 
         if reply.startswith("ERROR:"):
             logging.error(f"Error from ollama: {request.text}")
 
-        logging.info(f"Sending reply: {reply}")
-        await message.reply(reply)
+        # Discord max message length is 2000 characters. Wrap into lines.
+        wrapped_response = word_wrap(reply)
+        for part in wrapped_response:
+            logging.info(f"Sending reply: {part}")
+            await message.reply(part)

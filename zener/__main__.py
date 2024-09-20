@@ -58,7 +58,6 @@ if __name__ == "__main__":
         logging.info("Registering commands.")
         await register_youtube(client)
         await register_util(client)
-        # await register_dialo(client)
         await register_chat(client)
 
         # Sync commands on guilds.

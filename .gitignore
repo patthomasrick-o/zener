@@ -1,4 +1,5 @@
 .vscode
+.zed
 cache/*
 secret.txt
 config.ini

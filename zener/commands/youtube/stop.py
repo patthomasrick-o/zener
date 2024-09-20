@@ -41,7 +41,7 @@ class StopCommand(commands.Cog):
                 await interaction.response.send_message(
                     "Nothing is playing.", ephemeral=True
                 )
-        except Exception as e:
+        except Exception:
             # No method?
             await interaction.response.send_message(
                 "Couldn't stop.",
